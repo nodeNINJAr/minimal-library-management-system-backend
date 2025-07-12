@@ -7,7 +7,7 @@ import { Book } from "../models/book-model";
 
 const bookBorrow = Router();
 
-// ** borrow a book
+// ** Borrow a Book
 bookBorrow.post('/borrow', async(req:Request, res:Response)=>{
     //  
     try{
@@ -44,12 +44,71 @@ bookBorrow.post('/borrow', async(req:Request, res:Response)=>{
         })
 
     }catch(err){
-       console.log(err);
-    }
+    res.status(500).json({
+      success: false,
+      message: 'Failed to saved borrowed book data',
+      error: (err as Error).message,
+    });
+ }
 
 });
 
-// 
+// ** Borrowed Books Summary (Using Aggregation)
+
+bookBorrow.get('/borrow', async(req:Request, res:Response)=>{
+   // 
+  try{
+         // 
+   const summary = await BorrowBook.aggregate([
+        //  
+        {
+            $group:{
+                _id:"$book",
+                totalQuantity:{$sum:"$quantity"},
+            },
+        },
+        {
+         $lookup:{
+            from:"books",
+            localField:"_id",
+            foreignField:"_id",
+            as:"bookDetails"
+         },   
+        },
+        {
+           $unwind:"$bookDetails",
+        },
+        
+        {
+          $project:{
+            _id:0,
+            book:{
+                title:"$bookDetails.title",
+                isbn:"$bookDetails.isbn",
+            },
+            totalQuantity:1
+          },  
+        },
+      ])
+
+      res.status(200).send({
+        success: true,
+        message: 'Borrowed books summary retrieved successfully',
+        data: summary,
+      })
+
+  }catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve borrowed book summary',
+      error: (error as Error).message,
+    });
+  }
 
 
-export default bookBorrow
+})
+
+
+
+
+export default bookBorrow;
