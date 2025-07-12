@@ -1,6 +1,7 @@
 import express, { Application, Request, Response } from "express";
 const app:Application =  express();
 import bookRoute from "./app/controllers/book-controller"
+import bookBorrow from "./app/controllers/book-borrowController"
 
 
 
@@ -10,9 +11,9 @@ app.use(express.json());
 
 // **All api end point
 
-// post api
+// api endpoint
 app.use('/api', bookRoute)
-
+app.use('/api', bookBorrow)
 // 
 
 
