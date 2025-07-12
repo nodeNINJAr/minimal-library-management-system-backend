@@ -9,6 +9,8 @@ app.use(express.json());
 
 // **All api end point
 
+// post api
+app.use("/api",)
 
 
 
@@ -17,7 +19,7 @@ app.use(express.json());
 
 // base url
 app.get('/', (req:Request, res:Response)=>{
-    
+
     res.send("Library Management API Running")
 })
 
