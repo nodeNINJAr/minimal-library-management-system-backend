@@ -76,6 +76,25 @@ bookSchema.post("findOneAndDelete", async function(doc, next){
 });
 
 // pre middleware
+bookSchema.pre("save", async function (next) {
+   // 
+   const isExist = await Book.findOne({isbn:this.isbn})
+  //  
+    if (this.copies <= 0 && isExist === null) {
+    return next(new Error("You need at least 1 copy and ISBN must be unique"));
+  }
+
+  // Generate new ISBN until unique
+  if(isExist){
+      let newIsbn;
+        // 
+        newIsbn = `RND-${Math.floor(100000000 + Math.random() * 900000000)}`;
+        this.isbn = newIsbn;
+  }
+  // 
+  next();
+  // 
+})
 
 
 
