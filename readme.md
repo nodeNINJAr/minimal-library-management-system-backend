@@ -39,7 +39,7 @@ A robust and scalable backend service for managing library resources, members, a
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/library-management.git
+   git clone https://github.com/nodeNINJAr/Library-Management-app
    cd library-management
 
 🚀 Usage
