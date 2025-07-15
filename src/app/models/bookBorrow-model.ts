@@ -13,11 +13,11 @@ const bookBorrowSchema = new Schema<IBorrow>(
       },
       quantity:{
         type:Number,
-        required: [true, 'Copies is required'],
-        min:[1, "Copies must be a positive number"],
+        required: [true, 'Quantity is required'],
+        min:[1, "Quantity must be a positive number"],
         validate:{
             validator:Number.isInteger,
-            message:'Copies must be an integer',
+            message:'Quantity must be an integer',
         }
       },
       dueDate:{
