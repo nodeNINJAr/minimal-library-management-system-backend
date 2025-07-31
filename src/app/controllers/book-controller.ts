@@ -118,6 +118,9 @@ bookRoute.put('/books/:bookId', async(req:Request, res:Response)=>{
     }
    //    
    const data = await Book.findByIdAndUpdate(bookId, updatedData, {new:true});
+  // update book quantity by statics mehtood
+    await Book.updateCopies(bookId, updatedData?.copies);
+
    //    
    res.status(200).json({
      success:true,

@@ -36,7 +36,7 @@ const bookSchema = new Schema<IBooks, BookModel>(
  copies: {
       type: Number,
       required: true,
-      min: [1, 'Copies must be a positive number'],
+      // min: [1, 'Book Copies must be 1'],
       validate: {
         validator: Number.isInteger,
         message: 'Copies must be an integer',
@@ -55,7 +55,7 @@ const bookSchema = new Schema<IBooks, BookModel>(
 
 // static methood
 bookSchema.statics.updateCopies = async function (bookId: string, newCopies: number) {
-  const available = newCopies > 0;
+  const available = newCopies > 0 && true || newCopies === 0 && false;
   return this.findByIdAndUpdate(
     bookId,
     {

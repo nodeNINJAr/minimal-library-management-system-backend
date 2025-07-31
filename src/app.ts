@@ -2,12 +2,17 @@ import express, { Application, Request, Response } from "express";
 const app:Application =  express();
 import bookRoute from "./app/controllers/book-controller"
 import bookBorrow from "./app/controllers/book-borrowController"
+import cors from "cors";
 
 
 
 
 // ** middleware
 app.use(express.json());
+//
+app.use(cors({
+   origin:"http://localhost:5173"
+})) 
 
 // **All api end point
 

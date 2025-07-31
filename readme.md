@@ -1,8 +1,6 @@
-# 📚 Library Management System (Backend)
+# 📚Minimal Library Management System (Backend)
 
 A robust and scalable backend service for managing library resources, members, and transactions. Built using **Node.js**, **TypeScript**, **Express**, **MongoDB**, and **Mongoose** ODM, this backend provides RESTful APIs to support frontend clients in managing books, users, borrowing/returning operations, and more.
-
-🔗 **Presentation**: [Video Link](https://vimeo.com/1101516018?share=copy#t=0)
 
 ---
 
@@ -39,7 +37,7 @@ A robust and scalable backend service for managing library resources, members, a
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/nodeNINJAr/Library-Management-app
+   git clone 
    cd library-management
 
 🚀 Usage
