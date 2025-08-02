@@ -19,7 +19,7 @@ const bookSchema = new Schema<IBooks, BookModel>(
   genre: {
     type: String,
     required: true,
-    enum: ['FICTION', 'NON_FICTION', 'SCIENCE', 'HISTORY', 'BIOGRAPHY', 'FANTASY'],
+    enum: ['ALL','FICTION', 'NON_FICTION', 'SCIENCE', 'HISTORY', 'BIOGRAPHY', 'FANTASY'],
     message: '{VALUE} is not a valid genre',
   },
   isbn: {

@@ -9,9 +9,8 @@ const bookRoute = express.Router();
 
 // interface for book query
 interface BookQuery {
-    filter?:string;
-    sortBy?:string;
-    sort?:'asc' | 'dsc';
+    genre?:string;
+    search:string;
     limit?:string;
 }
 
@@ -32,32 +31,50 @@ bookRoute.post('/books', async(req:Request, res:Response)=>{
 
 
 
+
 // ** get all books
 bookRoute.get('/books', async(req:Request<{},{},{},BookQuery>, res:Response)=>{
 
 try{
 // catch the query
-const {filter,sortBy,sort,limit} = req.query;
+const {genre, search ,limit} = req.query;
 
 // 
-const query:FilterQuery<typeof Book> ={};
+let query:FilterQuery<typeof Book> ={};
 // filter by genre
-if(filter){
-   query.genre = filter;
+if(genre){
+   query.genre = genre;
 }
-// sorting
-const sortOptions: {[key: string]: SortOrder} = {};
-if (sortBy) {
-    sortOptions[sortBy] = sort === "dsc" ? -1 : 1;
+
+// serach query
+if(search){
+   query.$or = [
+      { title:{
+        $regex:search, $options:"i"
+      }},
+     { author:{
+           $regex:search, $options:"i"
+      }},
+       { isbn:{
+           $regex:search, $options:"i"
+      }},
+      {
+      genre:{
+          $regex:search, $options:"i"
+    }}
+
+   ]
 }
+
+
+
 // limit
-const limitNum = parseInt(limit ?? '5');
-const finalLimit = isNaN(limitNum) ? 5 : limitNum;
+// const limitNum = parseInt(limit ?? '5');
+// const finalLimit = isNaN(limitNum) ? 5 : limitNum;
 
 // fetch book
     const data = await Book.find(query)
-    .sort(sortOptions)
-    .limit(finalLimit);
+    // .limit(finalLimit);
     // send response
     res.status(200).send({
         "success": true,
@@ -74,6 +91,15 @@ const finalLimit = isNaN(limitNum) ? 5 : limitNum;
 
 
 })
+
+
+
+
+
+
+
+
+
 
 
 // Get Book by ID api
