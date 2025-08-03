@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { Book } from './../models/book-model';
 import { Error, FilterQuery, SortOrder } from 'mongoose';
+import { BorrowBook } from '../models/bookBorrow-model';
 
 
 // router
@@ -65,8 +66,49 @@ if(search){
 
    ]
 }
+// total book count
+const totalBooks = await Book.estimatedDocumentCount();
+// total copies
+const totalCopies = await Book.aggregate([
+  {
+  $group:{
+    _id:null,
+    total:{
+      $sum:"$copies"
+    },
+  }
+  },
+  {
+    $project:{
+        _id:0,
+        total:1,
+    }
+  }
+])
 
+// total borrwed copies
+const totalBorrwed = await BorrowBook.aggregate([
+    {
+      $group:{
+      _id:null,
+      total:{
+      $sum:"$quantity"
+    }
+  }
+  },
+   {
+    $project:{
+      _id:0,
+      total:1,
+    }
+   }
+])
 
+// 
+const totalBookCopies = totalCopies[0]?.total || 0;
+// 
+const totalBorrwedCopies = totalBorrwed[0]?.total || 0;
+const totalAvailCopies = totalBookCopies - totalBorrwedCopies;
 
 // limit
 // const limitNum = parseInt(limit ?? '5');
@@ -79,7 +121,10 @@ if(search){
     res.status(200).send({
         "success": true,
         "message":"Books retrieved successfully",
-         data
+         data,
+         totalBooks,
+         totalBookCopies,
+         totalAvailCopies,
     })
 }catch(err){
     res.status(500).json({
@@ -89,12 +134,7 @@ if(search){
     });
 }
 
-
 })
-
-
-
-
 
 
 
