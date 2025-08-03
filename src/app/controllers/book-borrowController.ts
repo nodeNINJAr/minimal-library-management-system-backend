@@ -7,6 +7,17 @@ import { Book } from "../models/book-model";
 
 const bookBorrow = Router();
 
+
+
+// interface for book query
+interface BookQuery {
+  page?: string;
+  limit?: string;
+}
+
+
+
+
 // ** Borrow a Book
 bookBorrow.post('/borrow', async(req:Request, res:Response)=>{
     //  
@@ -50,58 +61,63 @@ bookBorrow.post('/borrow', async(req:Request, res:Response)=>{
 
 // ** Borrowed Books Summary (Using Aggregation)
 
-bookBorrow.get('/borrow', async(req:Request, res:Response)=>{
-   // 
-  try{
-         // 
-   const summary = await BorrowBook.aggregate([
-        //  
-        {
-            $group:{
-                _id:"$book",
-                totalQuantity:{$sum:"$quantity"},
-            },
-        },
-        {
-         $lookup:{
-            from:"books",
-            localField:"_id",
-            foreignField:"_id",
-            as:"bookDetails"
-         },   
-        },
-        {
-           $unwind:"$bookDetails",
-        },
-        
-        {
-          $project:{
-            _id:0,
-            book:{
-                title:"$bookDetails.title",
-                isbn:"$bookDetails.isbn",
-            },
-            totalQuantity:1
-          },  
-        },
-      ])
+bookBorrow.get('/borrow', async (req: Request<{},{},{},BookQuery>, res: Response) => {
+  const { limit, page } = req.query;
 
-      res.status(200).send({
-        success: true,
-        message: 'Borrowed books summary retrieved successfully',
-        data: summary,
-      })
+  try {
+    const limitNum = parseInt(limit ?? '10');
+    const pageNum = parseInt(page ?? '1');
+    const skip = (pageNum - 1) * limitNum;
 
-  }catch (error) {
+    const summary = await BorrowBook.aggregate([
+      {
+        $group: {
+          _id: "$book",
+          totalQuantity: { $sum: "$quantity" },
+        },
+      },
+      {
+        $lookup: {
+          from: "books",
+          localField: "_id",
+          foreignField: "_id",
+          as: "bookDetails"
+        },
+      },
+      {
+        $unwind: "$bookDetails",
+      },
+      {
+        $project: {
+          _id: 0,
+          book: {
+            title: "$bookDetails.title",
+            isbn: "$bookDetails.isbn",
+          },
+          totalQuantity: 1
+        },
+      },
+      { $sort: { totalQuantity: -1 } },
+      { $skip: skip },
+      { $limit: limitNum },
+    ]);
+
+    res.status(200).send({
+      success: true,
+      message: 'Borrowed books summary retrieved successfully',
+      data: summary,
+      page: pageNum,
+      limit: limitNum,
+    });
+
+  } catch (error) {
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve borrowed book summary',
       error: (error as Error).message,
     });
   }
-
-
-})
+});
 
 
 

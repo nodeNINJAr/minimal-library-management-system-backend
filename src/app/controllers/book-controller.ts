@@ -13,6 +13,7 @@ interface BookQuery {
     genre?:string;
     search:string;
     limit?:string;
+    page?:string;
 }
 
 
@@ -38,7 +39,7 @@ bookRoute.get('/books', async(req:Request<{},{},{},BookQuery>, res:Response)=>{
 
 try{
 // catch the query
-const {genre, search ,limit} = req.query;
+const {genre, search ,limit,page} = req.query;
 
 // 
 let query:FilterQuery<typeof Book> ={};
@@ -111,12 +112,18 @@ const totalBorrwedCopies = totalBorrwed[0]?.total || 0;
 const totalAvailCopies = totalBookCopies - totalBorrwedCopies;
 
 // limit
-// const limitNum = parseInt(limit ?? '5');
-// const finalLimit = isNaN(limitNum) ? 5 : limitNum;
+const limitNum = parseInt(limit ?? '10');
+const pageNum = parseInt(page ?? '1');
+const skip = (pageNum - 1) * limitNum
+
 
 // fetch book
     const data = await Book.find(query)
-    // .limit(finalLimit);
+            .sort({ copies: -1 })
+            .skip(skip)
+            .limit(limitNum);
+
+
     // send response
     res.status(200).send({
         "success": true,
