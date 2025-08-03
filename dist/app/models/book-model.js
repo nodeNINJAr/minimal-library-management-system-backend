@@ -27,7 +27,7 @@ const bookSchema = new mongoose_1.Schema({
     genre: {
         type: String,
         required: true,
-        enum: ['FICTION', 'NON_FICTION', 'SCIENCE', 'HISTORY', 'BIOGRAPHY', 'FANTASY'],
+        enum: ['ALL', 'FICTION', 'NON_FICTION', 'SCIENCE', 'HISTORY', 'BIOGRAPHY', 'FANTASY'],
         message: '{VALUE} is not a valid genre',
     },
     isbn: {
@@ -44,7 +44,7 @@ const bookSchema = new mongoose_1.Schema({
     copies: {
         type: Number,
         required: true,
-        min: [1, 'Copies must be a positive number'],
+        // min: [1, 'Book Copies must be 1'],
         validate: {
             validator: Number.isInteger,
             message: 'Copies must be an integer',
@@ -61,7 +61,7 @@ const bookSchema = new mongoose_1.Schema({
 // static methood
 bookSchema.statics.updateCopies = function (bookId, newCopies) {
     return __awaiter(this, void 0, void 0, function* () {
-        const available = newCopies > 0;
+        const available = newCopies > 0 && true || newCopies === 0 && false;
         return this.findByIdAndUpdate(bookId, {
             copies: newCopies,
             available: available,

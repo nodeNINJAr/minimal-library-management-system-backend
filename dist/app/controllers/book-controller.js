@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const book_model_1 = require("./../models/book-model");
+const bookBorrow_model_1 = require("../models/bookBorrow-model");
 // router
 const bookRoute = express_1.default.Router();
 // ** post a book
@@ -30,32 +31,93 @@ bookRoute.post('/books', (req, res) => __awaiter(void 0, void 0, void 0, functio
 }));
 // ** get all books
 bookRoute.get('/books', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     try {
         // catch the query
-        const { filter, sortBy, sort, limit } = req.query;
+        const { genre, search, limit, page } = req.query;
         // 
-        const query = {};
+        let query = {};
         // filter by genre
-        if (filter) {
-            query.genre = filter;
+        if (genre) {
+            query.genre = genre;
         }
-        // sorting
-        const sortOptions = {};
-        if (sortBy) {
-            sortOptions[sortBy] = sort === "dsc" ? -1 : 1;
+        // serach query
+        if (search) {
+            query.$or = [
+                { title: {
+                        $regex: search, $options: "i"
+                    } },
+                { author: {
+                        $regex: search, $options: "i"
+                    } },
+                { isbn: {
+                        $regex: search, $options: "i"
+                    } },
+                {
+                    genre: {
+                        $regex: search, $options: "i"
+                    }
+                }
+            ];
         }
+        // total book count
+        const totalBooks = yield book_model_1.Book.estimatedDocumentCount();
+        // total copies
+        const totalCopies = yield book_model_1.Book.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    total: {
+                        $sum: "$copies"
+                    },
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    total: 1,
+                }
+            }
+        ]);
+        // total borrwed copies
+        const totalBorrwed = yield bookBorrow_model_1.BorrowBook.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    total: {
+                        $sum: "$quantity"
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    total: 1,
+                }
+            }
+        ]);
+        // 
+        const totalBookCopies = ((_a = totalCopies[0]) === null || _a === void 0 ? void 0 : _a.total) || 0;
+        // 
+        const totalBorrwedCopies = ((_b = totalBorrwed[0]) === null || _b === void 0 ? void 0 : _b.total) || 0;
+        const totalAvailCopies = totalBookCopies - totalBorrwedCopies;
         // limit
-        const limitNum = parseInt(limit !== null && limit !== void 0 ? limit : '5');
-        const finalLimit = isNaN(limitNum) ? 5 : limitNum;
+        const limitNum = parseInt(limit !== null && limit !== void 0 ? limit : '10');
+        const pageNum = parseInt(page !== null && page !== void 0 ? page : '1');
+        const skip = (pageNum - 1) * limitNum;
         // fetch book
         const data = yield book_model_1.Book.find(query)
-            .sort(sortOptions)
-            .limit(finalLimit);
+            .sort({ copies: -1 })
+            .skip(skip)
+            .limit(limitNum);
         // send response
         res.status(200).send({
             "success": true,
             "message": "Books retrieved successfully",
-            data
+            data,
+            totalBooks,
+            totalBookCopies,
+            totalAvailCopies,
         });
     }
     catch (err) {
@@ -106,6 +168,8 @@ bookRoute.put('/books/:bookId', (req, res) => __awaiter(void 0, void 0, void 0, 
         }
         //    
         const data = yield book_model_1.Book.findByIdAndUpdate(bookId, updatedData, { new: true });
+        // update book quantity by statics mehtood
+        yield book_model_1.Book.updateCopies(bookId, updatedData === null || updatedData === void 0 ? void 0 : updatedData.copies);
         //    
         res.status(200).json({
             success: true,

@@ -37,7 +37,7 @@ bookBorrow.post('/borrow', (req, res) => __awaiter(void 0, void 0, void 0, funct
         // send res
         res.status(201).send({
             success: true,
-            message: "Book borrowed successfully",
+            message: `${copies} copies Book borrowed successfully`,
             data: bookBorrowd
         });
     }
@@ -51,11 +51,12 @@ bookBorrow.post('/borrow', (req, res) => __awaiter(void 0, void 0, void 0, funct
 }));
 // ** Borrowed Books Summary (Using Aggregation)
 bookBorrow.get('/borrow', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // 
+    const { limit, page } = req.query;
     try {
-        // 
+        const limitNum = parseInt(limit !== null && limit !== void 0 ? limit : '10');
+        const pageNum = parseInt(page !== null && page !== void 0 ? page : '1');
+        const skip = (pageNum - 1) * limitNum;
         const summary = yield bookBorrow_model_1.BorrowBook.aggregate([
-            //  
             {
                 $group: {
                     _id: "$book",
@@ -83,11 +84,16 @@ bookBorrow.get('/borrow', (req, res) => __awaiter(void 0, void 0, void 0, functi
                     totalQuantity: 1
                 },
             },
+            { $sort: { totalQuantity: -1 } },
+            { $skip: skip },
+            { $limit: limitNum },
         ]);
         res.status(200).send({
             success: true,
             message: 'Borrowed books summary retrieved successfully',
             data: summary,
+            page: pageNum,
+            limit: limitNum,
         });
     }
     catch (error) {

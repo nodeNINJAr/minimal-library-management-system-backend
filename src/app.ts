@@ -1,18 +1,20 @@
+import cors from 'cors';
 import express, { Application, Request, Response } from "express";
 const app:Application =  express();
 import bookRoute from "./app/controllers/book-controller"
 import bookBorrow from "./app/controllers/book-borrowController"
-import cors from "cors";
+
 
 
 
 
 // ** middleware
-app.use(express.json());
 //
+
+app.use(express.json());
 app.use(cors({
-   origin:"http://localhost:5173"
-})) 
+  origin:["https://library-management-front-end-dusky.vercel.app"]
+}));
 
 // **All api end point
 

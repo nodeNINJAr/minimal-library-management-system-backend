@@ -10,11 +10,11 @@ const bookBorrowSchema = new mongoose_1.Schema({
     },
     quantity: {
         type: Number,
-        required: [true, 'Copies is required'],
-        min: [1, "Copies must be a positive number"],
+        required: [true, 'Quantity is required'],
+        min: [1, "Quantity must be atleast 1"],
         validate: {
             validator: Number.isInteger,
-            message: 'Copies must be an integer',
+            message: 'Quantity must be an integer',
         }
     },
     dueDate: {
