@@ -45,11 +45,12 @@ bookBorrow.post('/borrow', async(req:Request, res:Response)=>{
         // send res
         res.status(201).send({
             success: true,
-            message:"Book borrowed successfully",
+            message:`${copies} copies Book borrowed successfully`,
             data:bookBorrowd
         })
 
     }catch(err){
+    
     res.status(500).json({
       success: false,
       message: 'Failed to saved borrowed book data',
